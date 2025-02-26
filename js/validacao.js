@@ -54,18 +54,43 @@ const mensagensDeErro = {
     },
     estado: {
         valueMissing: 'O campo de estado não pode estar vazio.'
+    },
+    telefone: {
+        valueMissing: 'O campo de telefone não pode estar vazio.',
+        patternMismatch: 'O telefone digitado não é válido.'
+    },
+    instagram: {
+        valueMissing: 'O campo de Instagram não pode estar vazio.',
+        patternMismatch: 'O Instagram digitado não é válido.'
+    },
+    nome_cadastro: {
+        valueMissing: 'O campo de nome não pode estar vazio.'
     }
 }
 
 const validadores = {
     dataNascimento:input => validaDataNascimento(input),
     cpf:input => validaCPF(input),
-    cep:input => recuperarCEP(input)
+    cep:input => recuperarCEP(input),
+    telefone:input => validaTelefone(input)
 }
 
 function mostraMensagemDeErro(tipoDeInput, input) {
     let mensagem = ''
+
+    if (input.validity.customError) {
+        return input.validationMessage
+    }
+
+    console.log(input)
+    console.log(input.validity)
+    console.log(tipoDeInput)
+    if (!mensagensDeErro[tipoDeInput]) {
+        return mensagem
+    }
+
     tiposDeErro.forEach(erro => {
+        console.log(erro)
         if(input.validity[erro]) {
             mensagem = mensagensDeErro[tipoDeInput][erro]
         }
@@ -134,7 +159,7 @@ function checaEstruturaCPF(cpf) {
 }
 
 function checaDigitoVerificador(cpf, multiplicador) {
-    if(multiplicador >= 12) {
+    if(multiplicador >= 10) { // 12
         return true
     }
 
@@ -194,4 +219,43 @@ function preencheCamposComCEP(data) {
     logradouro.value = data.logradouro
     cidade.value = data.localidade
     estado.value = data.uf
+}
+
+async function validaTelefone(input) {
+    const telefone = input.value.replace(/\D/g, '')
+    let mensagem = ''
+
+    if(!checaTamanhoTelefone(telefone)) {
+        mensagem = 'O telefone digitado não é válido.'
+        input.setCustomValidity(mensagem)
+        return
+    }
+    await checaDDD(input)
+    return   
+}
+
+async function checaDDD(input) {
+    const telefone = input.value
+    const ddd = telefone.includes("(") ? telefone.substr(1, 2) : telefone.substr(0, 2)
+    const url = `https://brasilapi.com.br/api/ddd/v1/${ddd}`
+
+    console.log(input.validity)
+    if(!input.validity.patternMismatch && !input.validity.valueMissing) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.message) {
+                input.setCustomValidity('DDD inválido.');
+            } else {
+                input.setCustomValidity('');
+            }
+        } catch {
+            input.setCustomValidity('Erro ao validar o DDD.');
+        }
+    }
+}
+
+function checaTamanhoTelefone(telefone) {
+    return telefone.length >= 11 && telefone.length <= 14
 }

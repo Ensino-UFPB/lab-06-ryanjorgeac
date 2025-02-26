@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="./assets/css/componentes/inputs.css">
     <link rel="stylesheet" href="./assets/css/componentes/botao.css">
     <link rel="stylesheet" href="./assets/css/cadastro_produto.css">
+    <script src="simple-mask-money.umd.js"></script>
 </head>
 <body>
     <header class="cabecalho container">
@@ -31,13 +32,31 @@
             <h1 class="cartao__titulo">Cadastrar um produto</h1>
             <form action="./cadastro_produto_concluido.html" class="flex flex--coluna">
                 <div class="input-container">
-                    <input name="nome" id="nome" class="input" type="text" placeholder="Nome">
-                    <label class="input-label" for="nome">Nome</label>
+                    <input name="nome_cadastro" id="nome_cadastro" class="input" type="text" placeholder="Nome" required>
+                    <label class="input-label" for="nome_cadastro">Nome</label>
                     <span class="input-mensagem-erro">Este campo não está válido</span>
                 </div>
                 <div class="input-container cadastro__preco-container">
                     <input name="preco" id="preco" class="input" type="text" placeholder="Preço">
                     <label class="input-label" for="preco">Preço</label>
+                    <script>
+                        const inputPreco = document.getElementById('preco');
+                        const optionsUSD = {
+                          afterFormat(e) { console.log('afterFormat', e); },
+                          allowNegative: false,
+                          beforeFormat(e) { console.log('beforeFormat', e); },
+                          negativeSignAfter: false,
+                          prefix: '$',
+                          suffix: '',
+                          fixed: true,
+                          fractionDigits: 2,
+                          decimalSeparator: ',',
+                          thousandsSeparator: '.',
+                          cursor: 'end'
+                        };
+                    
+                        SimpleMaskMoney.setMask(inputPreco, optionsUSD);
+                      </script>
                     <span class="input-mensagem-erro">Este campo não está válido</span>
                 </div>
                 <div class="input-container cadastro__descricao-container">
@@ -49,5 +68,6 @@
             </form>
         </section>
     </main>
+    <script src="./js/app.js" type="module"></script>
 </body>
 </html>
